@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-security-log-analyzer"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+dependencies = [
+    "python-evtx",
+    "typer",
+    "rich",
+    "pydantic",
+    "pyyaml"
+]
+
+[project.scripts]
+loganalyzer = "loganalyzer.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]

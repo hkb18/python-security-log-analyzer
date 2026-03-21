@@ -1,0 +1,26 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Output files (keep folder, ignore contents)
+output/*
+!output/.gitkeep
+
+# Logs (DO NOT upload raw EVTX files)
+sample_logs/*.evtx
+
+# Temporary files
+*.log
+*.tmp
+*.egg-info/
