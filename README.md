@@ -99,6 +99,34 @@ python-security-log-analyzer/
 - Apply rule-based detection logic
 - Review detection output and tune logic to reduce false positives
 
+## Example Detection Output
+
+### Suspicious PowerShell Detection
+
+```json
+{
+  "EventID": "1",
+  "TimeCreated": "...",
+  "Computer": "...",
+  "Image": "powershell.exe",
+  "CommandLine": "... -enc ...",
+  "User": "...",
+  "MatchedKeywords": ["powershell", "-enc"]
+}
+```
+### Brute-Force Detection
+
+```json
+{
+  "DetectionType": "Brute Force Authentication Attempt",
+  "TargetUserName": "testuser",
+  "IpAddress": "192.168.56.103",
+  "FailureCount": 20,
+  "LogonType": "3"
+}
+```
+
+
 ## Key Findings So Far
 
 The initial PowerShell detection logic produced a high false-positive rate due to Splunk service activity. Detection logic was subsequently refined to exclude service-generated events and require higher-signal indicators such as:
@@ -140,6 +168,22 @@ The detection pipeline is fully operational and demonstrates:
 - Evidence-backed analysis and documentation
 
 The project reflects a practical SOC detection engineering workflow using real telemetry and controlled attack simulation.
+
+## SOC Relevance
+
+This project demonstrates core detection engineering capabilities used in real Security Operations Centers (SOC):
+
+- Parsing and normalizing raw telemetry
+- Identifying suspicious behavior from process execution logs
+- Detecting authentication abuse through repeated failed logons
+- Reducing false positives through rule tuning
+- Correlating multiple events into actionable detections
+
+These workflows align with responsibilities of:
+
+- SOC Analysts (Tier 1 / Tier 2)
+- Detection Engineers
+- Incident Responders
 
 ## MITRE ATT&CK Mapping
 
