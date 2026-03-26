@@ -55,3 +55,61 @@ def detect_suspicious_powershell(events):
             })
 
     return findings
+
+def detect_bruteforce_logons(events, threshold=5):
+    """
+    Detect repeated failed logon attempts from Windows Security Event ID 4625.
+    Groups failures by (TargetUserName, IpAddress) and reports clusters that
+    meet or exceed the threshold.
+    """
+    grouped_failures = {}
+
+    for event in events:
+        if event.get("EventID") != "4625":
+            continue
+
+        username = event.get("TargetUserName") or "UNKNOWN"
+        ip_address = event.get("IpAddress") or "UNKNOWN"
+        logon_type = event.get("LogonType") or "UNKNOWN"
+
+        key = (username, ip_address)
+
+        if key not in grouped_failures:
+            grouped_failures[key] = {
+                "TargetUserName": username,
+                "IpAddress": ip_address,
+                "LogonType": logon_type,
+                "Count": 0,
+                "FirstSeen": event.get("TimeCreated"),
+                "LastSeen": event.get("TimeCreated"),
+                "Events": []
+            }
+
+        grouped_failures[key]["Count"] += 1
+        grouped_failures[key]["LastSeen"] = event.get("TimeCreated")
+        grouped_failures[key]["Events"].append({
+            "TimeCreated": event.get("TimeCreated"),
+            "Computer": event.get("Computer"),
+            "WorkstationName": event.get("WorkstationName"),
+            "Status": event.get("Status"),
+            "SubStatus": event.get("SubStatus"),
+            "FailureReason": event.get("FailureReason"),
+            "IpPort": event.get("IpPort")
+        })
+
+    findings = []
+
+    for _, group in grouped_failures.items():
+        if group["Count"] >= threshold:
+            findings.append({
+                "DetectionType": "Brute Force Authentication Attempt",
+                "TargetUserName": group["TargetUserName"],
+                "IpAddress": group["IpAddress"],
+                "LogonType": group["LogonType"],
+                "FailureCount": group["Count"],
+                "FirstSeen": group["FirstSeen"],
+                "LastSeen": group["LastSeen"],
+                "SampleEvents": group["Events"][:5]
+            })
+
+    return findings

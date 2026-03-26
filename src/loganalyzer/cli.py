@@ -1,7 +1,7 @@
 import typer
 from pathlib import Path
 from loganalyzer.parser import read_evtx, extract_basic_fields
-from loganalyzer.detectors import detect_suspicious_powershell
+from loganalyzer.detectors import detect_suspicious_powershell, detect_bruteforce_logons
 
 app = typer.Typer(help="Windows EVTX security log analyzer")
 
@@ -30,7 +30,15 @@ def analyze(
     print("\n[+] Reading Security logs...")
     security_events = read_evtx(str(security))
     print(f"Loaded {len(security_events)} Security events\n")
-    print(extract_basic_fields(security_events[0]))
+
+    parsed_security = [extract_basic_fields(e) for e in security_events]
+    print("\n[+] Running brute-force detection...")
+    bruteforce_findings = detect_bruteforce_logons(parsed_security)
+
+    print(f"Detected {len(bruteforce_findings)} brute-force attempts\n")
+
+    for finding in bruteforce_findings:
+        print(finding)
 
 if __name__ == "__main__":
     app()
