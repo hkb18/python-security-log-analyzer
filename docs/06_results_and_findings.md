@@ -128,11 +128,13 @@ Effective detection engineering requires continuous tuning to distinguish betwee
 
 
 
-\- No authentication attack coverage yet (e.g., Event ID 4625)
+\- No time-based correlation across events (fixed threshold only)
 
-\- No event correlation across log sources
+\- Cannot detect distributed brute-force attacks (multiple IPs targeting one user)
 
-\- Single-event detection only
+\- No correlation between failed (4625) and successful (4624) logons
+
+\- Limited detection coverage beyond PowerShell and authentication abuse
 
 
 
@@ -144,13 +146,13 @@ Effective detection engineering requires continuous tuning to distinguish betwee
 
 
 
-\- Implement brute-force detection
+\- Introduce time-window based correlation for authentication failures
 
-\- Add multi-event correlation
+\- Correlate failed (4625) and successful (4624) logons
 
-\- Improve detection precision
+\- Expand detection coverage (process injection, persistence, lateral movement)
 
-\- Expand rule coverage
+\- Improve detection scoring and prioritization
 
 
 
@@ -177,4 +179,174 @@ The project demonstrates:
 
 
 This aligns with SOC analyst and detection engineering workflows.
+
+
+
+\---
+
+
+
+\## Brute-Force Detection Results
+
+
+
+\### Overview
+
+
+
+Brute-force authentication detection was implemented using Windows Security Event ID \*\*4625 (failed logon attempts)\*\*.
+
+
+
+The detection groups failed authentication events by user and source IP, identifying repeated login failures indicative of brute-force activity.
+
+
+
+\---
+
+
+
+\### Result 1: Network-Based Authentication Attempts
+
+
+
+The detection identified repeated failed logon attempts targeting the account `testuser`.
+
+
+
+\- \*\*Target User:\*\* testuser  
+
+\- \*\*Source IP:\*\* 192.168.56.103  
+
+\- \*\*Logon Type:\*\* 3 (Network)  
+
+\- \*\*Failure Count:\*\* 20  
+
+
+
+This pattern indicates repeated remote authentication attempts, consistent with brute-force login behavior from another machine in the lab environment.
+
+
+
+\---
+
+
+
+\### Result 2: Controlled Local Authentication Failures
+
+
+
+Controlled testing generated repeated failed logon attempts for the account `bruteuser`.
+
+
+
+\- \*\*Target User:\*\* bruteuser  
+
+\- \*\*Source IP:\*\* 127.0.0.1  
+
+\- \*\*Logon Type:\*\* 2 (Interactive)  
+
+\- \*\*Failure Count:\*\* 7  
+
+
+
+These events were intentionally generated using incorrect passwords to validate Security log telemetry and confirm detection accuracy.
+
+
+
+\---
+
+
+
+\### Event Evidence
+
+
+
+Windows Security logs clearly recorded these events as Event ID 4625, including user, logon type, and failure reason.
+
+
+
+!\[Event Viewer 4625 Evidence](./screenshots/16\_bruteforce\_eventviewer\_4625.png)
+
+
+
+\---
+
+
+
+\### Detection Output
+
+
+
+The CLI output confirmed that the detection engine correctly grouped failed logon attempts and identified brute-force patterns.
+
+
+
+!\[Brute-force CLI Detection Output](./screenshots/17\_bruteforce\_cli\_detection\_output.png)
+
+
+
+\---
+
+
+
+\### Analysis
+
+
+
+The detection successfully:
+
+
+
+\- identified repeated authentication failures
+
+\- grouped events by user and source IP
+
+\- distinguished between network and local authentication attempts
+
+\- validated both real and simulated attack scenarios
+
+
+
+This demonstrates multi-event correlation capability within the detection engine.
+
+
+
+\---
+
+
+
+\### Security Insight
+
+
+
+Authentication logs provide critical visibility into account abuse attempts.
+
+
+
+Monitoring failed logons (Event ID 4625) is essential for:
+
+
+
+\- detecting brute-force attacks  
+
+\- identifying account enumeration attempts  
+
+\- monitoring lateral movement attempts  
+
+
+
+\---
+
+
+
+\### Conclusion
+
+
+
+The addition of brute-force detection significantly enhances the detection engine by introducing authentication monitoring and multi-event analysis.
+
+
+
+This brings the project closer to real-world SOC detection workflows.
 
